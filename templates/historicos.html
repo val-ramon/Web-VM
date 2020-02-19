@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/styleHistoricos.css') }}">
+		<link
+		    href="https://cdn.pydata.org/bokeh/release/bokeh-1.4.0.min.css"
+		    rel="stylesheet" type="text/css">
+		<link
+		    href="https://cdn.pydata.org/bokeh/release/bokeh-widgets-1.4.0.min.css"
+		    rel="stylesheet" type="text/css">
+		 <link
+		    href="http://cdn.bokeh.org/bokeh/release/bokeh-tables-1.4.0.min.css"
+		    rel="stylesheet" type="text/css">
+
+		<script src="https://cdn.pydata.org/bokeh/release/bokeh-1.4.0.min.js"></script>
+		<script src="https://cdn.pydata.org/bokeh/release/bokeh-widgets-1.4.0.min.js"></script>
+		<script src="http://cdn.bokeh.org/bokeh/release/bokeh-tables-1.4.0.min.js"></script>
+
+	</head>
+	<body>
+		<img src= "static/logo_sur.png" width="100px" height="100px" align="left">
+		<H1>Sistema de monitoreo DAS</H1>
+
+		<form action="/table">
+			<ul class="nav navbar-nav navbar-right">
+			      <li><a href="/">Mapa <span class="sr-only"></span></a></li>
+			      <li><a class = 'active' href="/table">Historicos <span class="sr-only"></span></a></li>
+			      <li><a href="/state">Estado del sistema <span class="sr-only"></span></a></li>
+			      <li><a href="/wf">Waterfall <span class="sr-only"></span></a></li>
+			      <li style="float:right"><a href="/logout">Desconectarse <span class="sr-only"></span></a></li>
+			</ul>
+
+		</form>
+
+		{{ script|safe }}
+		{{ div|safe }}
+
+	</body>
+</html>
