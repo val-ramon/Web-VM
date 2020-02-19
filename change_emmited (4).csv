@@ -1,0 +1,16 @@
+Eventos_permitidos,Intensity_tip,ProgresivaFin,ProgresivaIni,RT,color,rel_int
+Retroexcavadora/Camion,Zona 0,pk340,pk338.0,2000,Orange,0.5
+Retroexcavadora/Camion,Zona 1,pk342,pk340.0,4000,Orange,0.5
+Retroexcavadora/Camion,Zona 2,pk344,pk342.0,6000,Orange,0.5
+Retroexcavadora/Camion,Zona 3,pk346,pk344.0,8000,Orange,0.5
+Retroexcavadora/Camion,Zona 4,pk348,pk346.0,10000,Orange,0.5
+Retroexcavadora/Camion,Zona 5,pk350,pk348.0,12000,Orange,0.5
+Retroexcavadora/Camion,Zona 6,pk352,pk350.0,14000,Orange,0.5
+Retroexcavadora/Camion,Zona 7,pk354,pk352.0,16000,Orange,0.5
+Retroexcavadora/Camion,Zona 8,pk356,pk354.0,18000,Orange,0.5
+Retroexcavadora/Camion,Zona 9,pk358,pk356.0,20000,Orange,0.5
+Retroexcavadora/Camion,Zona 10,pk360,pk358.0,22000,Orange,0.5
+Retroexcavadora/Camion,Zona 11,pk362,pk360.0,24000,Orange,0.5
+Retroexcavadora/Camion,Zona 12,pk364,pk362.0,26000,Orange,0.5
+Retroexcavadora/Camion,Zona 13,pk366,pk364,28000,Orange,0.5
+Retroexcavadora/Camion,Zona 14,pk368,pk366,30000,Orange,0.5
