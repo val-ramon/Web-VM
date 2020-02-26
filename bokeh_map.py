@@ -25,10 +25,10 @@ def create_map(n):
     #path donde se encuentre el csv con los datos de las zonas
     pathData = os.environ['USERPROFILE']+'/Downloads/bokeh_flask/bokeh_flask_vm/'
 
-    archivosCsv = glob.glob(pathData + 'change_emmited*.csv')
+    archivosCsv = glob.glob(pathData + '*.csv')
     dic_cuadrados = defaultdict(list)
     
-    archivosDb = glob.glob(pathData + 'db*.db')
+    archivosDb = glob.glob(pathData + '*.db')
     dictHistoricos = defaultdict(list)
     pyVersion = platform.python_version()
     if (int(pyVersion[0]) == 2):
