@@ -9,7 +9,7 @@ from flask import render_template, request, redirect, url_for
 from flask import Flask
 from bokeh.embed import components
 from bokeh.layouts import row, layout
-from bokeh_figure_v5 import *
+from bokeh_figure import *
 import time
 import threading
 import os
@@ -170,15 +170,15 @@ def page():
     obj = fileO.read()
     fileO.close()
     usuariosHabilitados = obj.split('\n')
-    if ip not in usuariosHabilitados:
-        usuarioAutorizado = 0
-    else:
-        usuarioAutorizado = 1
+#    if ip not in usuariosHabilitados:
+#        usuarioAutorizado = 0
+#    else:
+#        usuarioAutorizado = 1
+    usuarioAutorizado = 1
     if ip not in ips.keys() and contActivos == 0:
         ips[ip] = time.time()
         contActivos = 1
     # Determine the selected feature
-    print (os.getcwd())
     if usuarioAutorizado:
         current_feature_name = request.args.get("feature_name")
         if current_feature_name == None:
@@ -235,5 +235,5 @@ if __name__ == '__main__':
     os.system("start cmd /k mueve_archivo_cambios.py")
     os.system("start cmd /k ejemplo_select.py")
     app.secret_key = os.urandom(12)
-    app.run(port=5000, host='0.0.0.0')
+    app.run(port=5006, host='0.0.0.0')
 #    socketio.run(app, port=5000, host='0.0.0.0')
