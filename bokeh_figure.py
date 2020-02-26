@@ -14,7 +14,7 @@ from bokeh.models import ColumnDataSource, HoverTool, ResetTool, SaveTool, DataT
 from bokeh.models.widgets import CheckboxGroup, Button, Select, Slider, Div, TextInput, RangeSlider
 from bokeh.models.ranges import Range1d
 from bokeh.models import PolyDrawTool
-from bokeh_callbacks_v5 import *
+from bokeh_callbacks import *
 import os, glob, copy, pickle, shutil
 import sys
 
