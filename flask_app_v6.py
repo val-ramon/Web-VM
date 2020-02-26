@@ -5,7 +5,7 @@ Created on Thu Feb  6 08:42:56 2020
 @author: ramon
 """
 
-from flask import render_template, request, session, redirect, url_for
+from flask import render_template, request, redirect, url_for
 from flask import Flask
 from bokeh.embed import components
 from bokeh.layouts import row, layout
@@ -58,7 +58,6 @@ def home():
     wfActivo = 0
     ip = request.remote_addr
     if contActivos == 0 or ip in ips.keys():
-        session['logged_in'] = True
         ips[ip] = time.time()
         contActivos = 1
         return redirect(url_for('page'))
@@ -166,8 +165,7 @@ def page():
     global contActivos, ips, wfActivo
     wfActivo = 0
     ip = request.remote_addr
-    print (session)
-    pathAutorizados = 'C:/Users/edomene/Downloads/bokeh_flask/bokeh_flask/usuariosAutorizados.txt'
+    pathAutorizados = os.environ['USERPROFILE']+'/Downloads/bokeh_flask/bokeh_flask/usuariosAutorizados.txt'
     fileO = open(pathAutorizados, 'r')
     obj = fileO.read()
     fileO.close()
@@ -234,6 +232,8 @@ if __name__ == '__main__':
     thread_elimina_ips = threading.Thread(target=elimina_ips)
     thread_elimina_ips.setDaemon(True)
     thread_elimina_ips.start()
+    os.system("start cmd /k mueve_archivo_cambios.py")
+    os.system("start cmd /k ejemplo_select.py")
     app.secret_key = os.urandom(12)
     app.run(port=5000, host='0.0.0.0')
 #    socketio.run(app, port=5000, host='0.0.0.0')
