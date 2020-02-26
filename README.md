@@ -9,3 +9,5 @@
 # Además se debe contar con versiones de 'osciloscopio.py' e 'impar.py' modificadas que se encuentran en VM que guardan las imágenes para el estado del equipo.
 
 # A su vez en VM se encuentra un script que descarga la base de datos periódicamente.
+
+# 'generador3.py' sirve para la traza de VM en Google Earth.
