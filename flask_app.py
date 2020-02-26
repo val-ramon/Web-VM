@@ -227,5 +227,5 @@ if __name__ == '__main__':
     thread_elimina_ips.start()
     app.secret_key = os.urandom(12)
     os.system("start cmd /k mueve_archivo_cambios.py")
-    os.system("start cmd /k ejemplo_select.py")
+    os.system("start cmd /k crea_archivo_db.py")
     app.run(port=5000, host='0.0.0.0')
