@@ -20,7 +20,7 @@ def visualiza_historicos():
     """
     
     pathData = os.environ['USERPROFILE']+'/Downloads/bokeh_flask/bokeh_flask_vm/'
-    archivosDb = glob.glob(pathData + 'db*.db')
+    archivosDb = glob.glob(pathData + '*.db')
     dictHistoricos = defaultdict(list)
     pyVersion = platform.python_version()
     if (int(pyVersion[0]) == 2):
@@ -78,7 +78,7 @@ def visualiza_historicos():
     botonSube.callback = callback_boton_sube
     botonBaja.callback = callback_boton_baja
     
-    archivosCsv = glob.glob('change_emmited*.csv')
+    archivosCsv = glob.glob('*.csv')
     mayor = 0
     #carga los datos de las zonas en un diccionario, lo carga como string, por eso la separacion por comas
     if len(archivosCsv) != 0:
