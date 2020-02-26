@@ -24,17 +24,17 @@ def create_figure(n):
         contenga las zonas, simplemente lo carga y crea el mapa sobre el mismo.
     """
     #path donde se encuentre el csv con los datos de las zonas
-    pathData = 'C:/Users/edomene/Downloads/'
+    pathData = os.environ['USERPROFILE']+'/Downloads/bokeh_flask_ultimo/bokeh_flask_ultimo/'
     os.chdir(pathData)
     archivosCsv = glob.glob('change_emmited*.csv')
     dic_cuadrados = defaultdict(list)
     
     archivosDb = glob.glob('db*.db')
     dictHistoricos = defaultdict(list)
-    fileO = open(archivosDb[-1], 'rb')
+    fileO = open(archivosDb[-1], 'r')
     while True:
         try:
-            dataHist = pickle.load(fileO, encoding = 'bytes')
+            dataHist = pickle.load(fileO)
             dictHistoricos['id'].append(dataHist[1])
             dictHistoricos['vehi'].append(dataHist[10].encode("ascii"))
             dictHistoricos['progre'].append(round(dataHist[2], 2))
@@ -296,14 +296,14 @@ def visualiza_historicos():
         realizar distintos filtros sobre la misma.
     """
     
-    pathData = 'C:/Users/edomene/Downloads/'
+    pathData = os.environ['USERPROFILE']+'/Downloads/bokeh_flask_ultimo/bokeh_flask_ultimo/'
     os.chdir(pathData)
     archivosCsv = glob.glob('db*.db')
     dictHistoricos = defaultdict(list)
-    fileO = open(archivosCsv[-1], 'rb')
+    fileO = open(archivosCsv[-1], 'r')
     while True:
         try:
-            dataHist = pickle.load(fileO, encoding='bytes')
+            dataHist = pickle.load(fileO)
             dictHistoricos['id'].append(dataHist[1])
             dictHistoricos['vehi'].append(dataHist[10].encode("ascii"))
             dictHistoricos['progre'].append(round(dataHist[2], 2))
@@ -417,18 +417,18 @@ def visualiza_estado():
     """
     tools=[]
     p = figure(plot_width=600, plot_height=400,x_range=(0,1), y_range=Range1d(0,49), tools = tools)
-    os.chdir('C:/Users/edomeneDownloads/bokeh_flask_ultimo/bokeh_flask_ultimo/static/estado')
-    imagenes_wf = glob.glob('impar*.png')
+#    os.chdir('C:/Users/edomeneDownloads/bokeh_flask_ultimo/bokeh_flask_ultimo/static/estado')
+    imagenes_estado = glob.glob(os.environ['USERPROFILE']+'/Downloads/bokeh_flask_ultimo/bokeh_flask_ultimo/static/estado/impar*.png')
 #    p.image_rgba(image=[fig], x=0, y=0, dw=10, dh=10)
-    p.image_url(url=['static/estado/'+imagenes_wf[-1]], x=0, y=0, w=1, h=49,anchor='bottom_left')
+    p.image_url(url=['static/estado/'+imagenes_estado[-1]], x=0, y=0, w=1, h=49,anchor='bottom_left')
     p.xaxis.visible = False
     p.yaxis.visible = False
     
     p2 = figure(plot_width=600, plot_height=400,x_range=(0,1), y_range=Range1d(0,49), tools = tools)
-    os.chdir('C:/Users/edomeneDownloads/bokeh_flask_ultimo/bokeh_flask_ultimo/static/estado')
-    imagenes_wf = glob.glob('osciloscopio*.png')
+#    os.chdir('C:/Users/edomeneDownloads/bokeh_flask_ultimo/bokeh_flask_ultimo/static/estado')
+    imagenes_estado = glob.glob(os.environ['USERPROFILE']+'/Downloads/bokeh_flask_ultimo/bokeh_flask_ultimo/static/estado/osciloscopio*.png')
 #    p.image_rgba(image=[fig], x=0, y=0, dw=10, dh=10)
-    p2.image_url(url=['static/estado/'+imagenes_wf[-1]], x=0, y=0, w=1, h=49,anchor='bottom_left')
+    p2.image_url(url=['static/estado/'+imagenes_estado[-1]], x=0, y=0, w=1, h=49,anchor='bottom_left')
     p2.xaxis.visible = False
     p2.yaxis.visible = False
 #    return divTemp, divTens, divSnr, temp, tens, snr, divC, divV
@@ -442,13 +442,17 @@ def visualiza_waterfall():
     p = figure(plot_width=1200, plot_height=600,x_range=(0,1), y_range=Range1d(0,49), tools = tools)
     p.xaxis.visible = False
     p.yaxis.visible = False
-    source = '/wf_web_vm/imagen_actual.jpg'
+    source = 'Y:/wf_web_vm/imagen_actual.jpg'
     destination = os.environ['USERPROFILE']+'/Downloads/bokeh_flask_ultimo/bokeh_flask_ultimo/static/wf/'+str(np.random.randint(0, high = sys.maxint))+'.png'
-    os.chdir( os.environ['USERPROFILE']+'/Downloads/bokeh_flask/bokeh_flask/static/wf')
-    imagenes_wf = glob.glob('*.png')
-    os.remove(imagenes_wf[-1])
+#    os.chdir( os.environ['USERPROFILE']+'/Downloads/bokeh_flask/bokeh_flask/static/wf')
+    imagenes_wf = glob.glob(os.environ['USERPROFILE']+'/Downloads/bokeh_flask/bokeh_flask/static/wf/*.png')
+    try:
+        for img in imagenes_wf:
+            os.remove(img)
+    except:
+        pass
     shutil.copyfile(source, destination)
-    imagenes_wf = glob.glob('*.png')
+    imagenes_wf = glob.glob(os.environ['USERPROFILE']+'/Downloads/bokeh_flask/bokeh_flask/static/wf/*.png')
     #le incrusta la imagen del mapa y crea las lineas de las zonas
     p.image_url(url=['static/'+imagenes_wf[-1]], x=0, y=0, w=1, h=49,anchor='bottom_left')
     
