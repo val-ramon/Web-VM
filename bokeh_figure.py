@@ -11,30 +11,36 @@ from bokeh.plotting import figure
 import numpy as np
 from collections import defaultdict
 from bokeh.models import ColumnDataSource, HoverTool, ResetTool, SaveTool, DataTable, TableColumn, BoxZoomTool
-from bokeh.models.widgets import CheckboxGroup, Button, Select, Slider, Div, TextInput, RangeSlider
+from bokeh.models.widgets import CheckboxGroup, Button, Select, Slider, Div, TextInput
 from bokeh.models.ranges import Range1d
 from bokeh.models import PolyDrawTool
 from bokeh_callbacks import *
-import os, glob, copy, pickle, shutil
-import sys
+import os, glob, copy, pickle, platform
 
-def create_figure(n):
+def create_map(n):
     """
         Esta función recibe un n predeterminado para crear el mapa de zonas. En caso de existir un archivo que ya
         contenga las zonas, simplemente lo carga y crea el mapa sobre el mismo.
     """
     #path donde se encuentre el csv con los datos de las zonas
-    pathData = os.environ['USERPROFILE']+'/Downloads/bokeh_flask_ultimo/bokeh_flask_ultimo/'
-    os.chdir(pathData)
-    archivosCsv = glob.glob('change_emmited*.csv')
+    pathData = os.environ['USERPROFILE']+'/Downloads/bokeh_flask/bokeh_flask_vm/'
+
+    archivosCsv = glob.glob(pathData + 'change_emmited*.csv')
     dic_cuadrados = defaultdict(list)
     
-    archivosDb = glob.glob('db*.db')
+    archivosDb = glob.glob(pathData + 'db*.db')
     dictHistoricos = defaultdict(list)
-    fileO = open(archivosDb[-1], 'r')
+    pyVersion = platform.python_version()
+    if (int(pyVersion[0]) == 2):
+        fileO = open(archivosDb[-1], 'r')
+    else:
+        fileO = open(archivosDb[-1], 'rb')
     while True:
         try:
-            dataHist = pickle.load(fileO)
+            if (int(pyVersion[0]) == 2):
+                dataHist = pickle.load(fileO)
+            else:
+                dataHist = pickle.load(fileO, encoding = 'bytes')
             dictHistoricos['id'].append(dataHist[1])
             dictHistoricos['vehi'].append(dataHist[10].encode("ascii"))
             dictHistoricos['progre'].append(round(dataHist[2], 2))
@@ -50,7 +56,7 @@ def create_figure(n):
         dictHistoricos['estado'][i] = str(dictHistoricos['estado'][i])
     fileO.close()
     dataframe_historicos = pd.DataFrame(dictHistoricos)
-#        del dataframe_historicos['index']
+
     source_historicos = ColumnDataSource(dataframe_historicos)
     source_historicos_muestra = ColumnDataSource(copy.deepcopy(dataframe_historicos))
     del source_historicos.data['index']
@@ -126,7 +132,6 @@ def create_figure(n):
         n=int(n)
         choices=['Ninguno','Retroexcavadora/Camion']
         lista_zonas=[(1.0,'Zona '+str(k),np.random.choice(choices)) for k in range(n)]     
-        #        zonas = []
         
         i = 0
         for scale, mz, evt_list in lista_zonas:
@@ -202,8 +207,6 @@ def create_figure(n):
         ('Intensidad relativa', '@rel_int')
     ], renderers = [ml])
     
-#    p.add_tools(hover_t)
-    
     #crea los sombreados de las zonas
     poli = p.multi_polygons(xs='x', ys = 'y', color = 'color', line_alpha = 0,fill_alpha = 0.3, source = source_cuadrados)
     poli.visible = True
@@ -212,7 +215,6 @@ def create_figure(n):
     draw_tool_l1 = PolyDrawTool(renderers=[ml])
     
     p.add_tools(draw_tool_l1)
-#    p.toolbar.active_tap = draw_tool_l1
     
     p.xaxis.bounds=(0,n)
     p.yaxis.visible=False
@@ -264,17 +266,14 @@ def create_figure(n):
     div2.visible = False
     
     callback_muestra_eventos_zona = muestra_eventos_zona(source, source_historicos, source_historicos_muestra, data_table, select, div2)
-#    callback_muestra_todos_eventos = muestra_todos_eventos(source_cambia_paginas)
     
     boton_muestra_eventos_zona = Button(label='Mostrar ultimos eventos de zona', button_type='success', callback=callback_muestra_eventos_zona)
     boton_muestra_eventos_zona.disabled = True
     
-#    buton_muestra_todos_eventos = Div(text="""<a href="/table" style = color: #fff>________Visualizar historicos_______</a>""", width=300, height=30, style={'font-size': '130%', 'color': '#fff', 'background-color': '#5cb85c', 'border-color': '#4cae4c', 'text-align': 'center'})
     callback_mouse = mouse_drag(source, source_cuadrados, source3, select, poli, slider_intensidad, input_eventos, eventos_perm, source_respaldo, largo_ducto)
     callback_mouse_end = mouse_end(poli, source_cuadrados, source, largo_ducto, draw_tool_l1, boton_elimina_zona, source_respaldo)
     callback_mouse_move = mouse_move(source, source_respaldo, source_cuadrados)
     callback_tap = tap(source, source_respaldo, source3, source_cuadrados, slider_intensidad, input_eventos, eventos_perm, select, poli, draw_tool_l1, boton_elimina_zona, boton_muestra_eventos_zona, data_table, div2)
-#    callback_mouse_guarda = mouse_guarda(source, source_respaldo, source_cuadrados)
     
     #detecta eventos realizados con mouse en la figura para llamar a callbacks que modificar la figura del mapa
     p.js_on_event(bokeh.events.Tap, callback_tap)
@@ -283,177 +282,5 @@ def create_figure(n):
     p.js_on_event(bokeh.events.PanEnd, callback_mouse_end)
     div = Div(text="""Eventos Permitidos:""", width=200, height=10)
     
-#    return p, checkbox_group, select, input_eventos, slider_intensidad, button, button2, div, boton_agregar_zona, text_input_prog_ini, text_input_prog_fin, boton_confirma_zona, boton_elimina_zona
     return p, checkbox_group, select, input_eventos, slider_intensidad, button, button2, div, div2, data_table, boton_muestra_eventos_zona, hover_t
 
-def usuario_activo():
-    div = Div(text="""Ya hay un usuario activo""", width=600, height=600)
-    return div
-
-def visualiza_historicos():
-    """
-        Esta función carga el archivo de la base de datos y la muestra al usuario en modo de table, permitiendo
-        realizar distintos filtros sobre la misma.
-    """
-    
-    pathData = os.environ['USERPROFILE']+'/Downloads/bokeh_flask_ultimo/bokeh_flask_ultimo/'
-    os.chdir(pathData)
-    archivosCsv = glob.glob('db*.db')
-    dictHistoricos = defaultdict(list)
-    fileO = open(archivosCsv[-1], 'r')
-    while True:
-        try:
-            dataHist = pickle.load(fileO)
-            dictHistoricos['id'].append(dataHist[1])
-            dictHistoricos['vehi'].append(dataHist[10].encode("ascii"))
-            dictHistoricos['progre'].append(round(dataHist[2], 2))
-            dictHistoricos['fecha'].append(dataHist[5].strftime("%Y/%m/%d, %H:%M:%S"))
-            dictHistoricos['estado'].append(dataHist[3])
-        except:
-            break
-    for i in range(len(dictHistoricos['vehi'])):
-        dictHistoricos['vehi'][i] = str(dictHistoricos['vehi'][i].decode())
-        dictHistoricos['id'][i] = str(dictHistoricos['id'][i])
-        dictHistoricos['progre'][i] = str(dictHistoricos['progre'][i])
-        dictHistoricos['fecha'][i] = str(dictHistoricos['fecha'][i])
-        dictHistoricos['estado'][i] = str(dictHistoricos['estado'][i])
-    fileO.close()
-    dictIteraCantHistoricos = {'cont': [0]}
-    dataframeIteraCantHistoricos = pd.DataFrame(dictIteraCantHistoricos)
-    dataframe_historicos = pd.DataFrame(dictHistoricos)
-#        del dataframe_historicos['index']
-    sourceIteraHistoricos = ColumnDataSource(dataframeIteraCantHistoricos)
-    source_todos_historicos = ColumnDataSource(dataframe_historicos)
-    source_historicos = ColumnDataSource(copy.deepcopy(dataframe_historicos[:500]))
-    source_historicos_filtrado = ColumnDataSource(copy.deepcopy(dataframe_historicos[:0]))
-    del source_historicos.data['index']
-    del source_historicos_filtrado.data['index']
-    keys = dictHistoricos.keys()
-    columns = [
-        TableColumn(field='id', title='ID'),
-        TableColumn(field='vehi', title='Vehiculo'),
-        TableColumn(field='progre', title='Progresiva'),
-        TableColumn(field='fecha', title='Fecha'),
-        TableColumn(field='estado', title='Estado')
-    ]
-        
-    data_table = DataTable(source=source_todos_historicos, columns=columns, width=600, height=400, editable=True, reorderable=False)
-    data_table.source = source_historicos_filtrado
-    
-    botonSube = Button(label = "Cargar eventos", button_type="success")
-    botonBaja = Button(label = "Cargar menos eventos", button_type="success")
-    botonBaja.visible = False
-    
-    callback_boton_baja = boton_baja(source_todos_historicos, source_historicos, sourceIteraHistoricos, data_table, botonSube)
-    callback_boton_sube = boton_sube(source_todos_historicos, source_historicos, sourceIteraHistoricos, data_table, botonBaja)
-    
-    botonSube.callback = callback_boton_sube
-    botonBaja.callback = callback_boton_baja
-    
-    boton_vuelve = Div(text="""<a href="/" style = color: #fff>________Volver al mapa_______</a>""", width=300, height=30, style={'font-size': '130%', 'color': '#fff', 'background-color': '#5cb85c', 'border-color': '#4cae4c', 'text-align': 'center'})
-    archivosCsv = glob.glob('change_emmited*.csv')
-    mayor = 0
-    #carga los datos de las zonas en un diccionario, lo carga como string, por eso la separacion por comas
-    if len(archivosCsv) != 0:
-        if len(archivosCsv) > 1:
-            for archivo in archivosCsv:
-                try:
-                    if int(archivo.split(' ')[-1].split('.')[0][1:-1]) > mayor:
-                        mayor = int(archivo.split(' ')[-1].split('.')[0][1:-1])
-                        archNuevo = archivo
-                except:
-                    pass
-        else:
-            archNuevo = archivosCsv[0]
-        archCsv = open(archNuevo, 'r')
-        data = archCsv.read()
-        archCsv.close()
-        keys = data.split('\n')[0].split(',')
-        data = data.split('\n')[1:]
-        dictData = defaultdict(list)
-        j = 0
-        for i in range(len(data)):
-            for key in keys:
-                dictData[key].append(data[i].split(',')[j])
-                j += 1
-            j = 0
-        dic_datos_lineas = dictData
-    pkIni = float(dic_datos_lineas['ProgresivaIni'][0].split('pk')[1])
-    pkFin = float(dic_datos_lineas['ProgresivaFin'][-1].split('pk')[1])
-    dic_filtros = {}
-    dic_filtros['rango_pk'] = [(pkIni,pkFin)]
-    dic_filtros['rango_fecha']  = [[dictHistoricos['fecha'][0].split(',')[0] ,dictHistoricos['fecha'][-1].split(',')[0] ]]
-    dic_filtros['estado'] = [list(np.unique(source_todos_historicos.data['estado']))]
-    dic_filtros['vehiculo'] = [list(np.unique(source_todos_historicos.data['vehi']))]
-    dic_filtros['id'] = [1]
-    dataframe_filtros = pd.DataFrame(dic_filtros)
-    source_filtros = ColumnDataSource(dataframe_filtros)
-    callback_filtra_rango_pk = filtra_rango_pk(source_todos_historicos, source_historicos_filtrado, data_table, source_filtros)
-    callback_filtra_vehiculos = filtra_vehiculos(source_todos_historicos, source_historicos_filtrado, data_table, source_filtros)
-    callback_filtra_estado = filtra_estado(source_todos_historicos, source_historicos_filtrado, data_table, source_filtros)
-    callback_filtra_id = filtra_id(source_todos_historicos, source_historicos_filtrado, data_table, source_filtros)
-    
-    callback_filtra_fecha_ini = filtra_fecha_ini(source_filtros)
-    callback_filtra_fecha_fin = filtra_fecha_fin(source_filtros)
-    callback_filtra_fecha = filtra_fecha(source_todos_historicos, source_historicos_filtrado, data_table, source_filtros)
-    
-    range_slider = RangeSlider(start=pkIni, end=pkFin, value=(pkIni,pkFin), step=.1, title="Filtrar por progresivas", callback=callback_filtra_rango_pk)
-    div = Div(text="""Filtrar por vehiculos:""", width=200, height=10)
-    checkbox_eventos = CheckboxGroup(labels=list(np.unique(source_todos_historicos.data['vehi'])), active=[x for x in range(len(list(np.unique(source_historicos.data['vehi']))))], callback = callback_filtra_vehiculos)
-    div2 = Div(text="""Filtrar por estado:""", width=200, height=10)
-    checkbox_estado = CheckboxGroup(labels=list(np.unique(source_todos_historicos.data['estado'])), active=[x for x in range(len(list(np.unique(source_historicos.data['estado']))))], callback = callback_filtra_estado)
-    filtro_id = TextInput(value='', title='Filtrar por id:', callback = callback_filtra_id)
-    
-    filtro_fecha_ini = TextInput(title='Fecha inicial a filtrar', value='AAAA/MM/DD', height=50, width=200, callback=callback_filtra_fecha_ini)
-    filtro_fecha_fin = TextInput(title='Fecha final a filtrar', value='AAAA/MM/DD', height=50, width=200, callback=callback_filtra_fecha_fin)
-    
-    boton_filtra_fecha = Button(label = "Filtrar fechas", button_type="success", callback=callback_filtra_fecha)
-    
-    return data_table, boton_vuelve, range_slider, checkbox_eventos, div, checkbox_estado, div2, filtro_id, botonSube, botonBaja, filtro_fecha_ini, filtro_fecha_fin, boton_filtra_fecha
-    
-def visualiza_estado():
-    """
-        Esta función crea dos figuras de bokeh y va tomando las imágenes del estado del equipo para mostrarlas.
-    """
-    tools=[]
-    p = figure(plot_width=600, plot_height=400,x_range=(0,1), y_range=Range1d(0,49), tools = tools)
-#    os.chdir('C:/Users/edomeneDownloads/bokeh_flask_ultimo/bokeh_flask_ultimo/static/estado')
-    imagenes_estado = glob.glob(os.environ['USERPROFILE']+'/Downloads/bokeh_flask_ultimo/bokeh_flask_ultimo/static/estado/impar*.png')
-#    p.image_rgba(image=[fig], x=0, y=0, dw=10, dh=10)
-    p.image_url(url=['static/estado/'+imagenes_estado[-1]], x=0, y=0, w=1, h=49,anchor='bottom_left')
-    p.xaxis.visible = False
-    p.yaxis.visible = False
-    
-    p2 = figure(plot_width=600, plot_height=400,x_range=(0,1), y_range=Range1d(0,49), tools = tools)
-#    os.chdir('C:/Users/edomeneDownloads/bokeh_flask_ultimo/bokeh_flask_ultimo/static/estado')
-    imagenes_estado = glob.glob(os.environ['USERPROFILE']+'/Downloads/bokeh_flask_ultimo/bokeh_flask_ultimo/static/estado/osciloscopio*.png')
-#    p.image_rgba(image=[fig], x=0, y=0, dw=10, dh=10)
-    p2.image_url(url=['static/estado/'+imagenes_estado[-1]], x=0, y=0, w=1, h=49,anchor='bottom_left')
-    p2.xaxis.visible = False
-    p2.yaxis.visible = False
-#    return divTemp, divTens, divSnr, temp, tens, snr, divC, divV
-    return p, p2
-    
-def visualiza_waterfall():
-    """
-        Esta función crea una figura de bokeh y va tomando las imágenes del waterfall para mostrarlas.
-    """
-    tools = []
-    p = figure(plot_width=1200, plot_height=600,x_range=(0,1), y_range=Range1d(0,49), tools = tools)
-    p.xaxis.visible = False
-    p.yaxis.visible = False
-    source = 'Y:/wf_web_vm/imagen_actual.jpg'
-    destination = os.environ['USERPROFILE']+'/Downloads/bokeh_flask_ultimo/bokeh_flask_ultimo/static/wf/'+str(np.random.randint(0, high = sys.maxint))+'.png'
-#    os.chdir( os.environ['USERPROFILE']+'/Downloads/bokeh_flask/bokeh_flask/static/wf')
-    imagenes_wf = glob.glob(os.environ['USERPROFILE']+'/Downloads/bokeh_flask/bokeh_flask/static/wf/*.png')
-    try:
-        for img in imagenes_wf:
-            os.remove(img)
-    except:
-        pass
-    shutil.copyfile(source, destination)
-    imagenes_wf = glob.glob(os.environ['USERPROFILE']+'/Downloads/bokeh_flask/bokeh_flask/static/wf/*.png')
-    #le incrusta la imagen del mapa y crea las lineas de las zonas
-    p.image_url(url=['static/'+imagenes_wf[-1]], x=0, y=0, w=1, h=49,anchor='bottom_left')
-    
-    return p
