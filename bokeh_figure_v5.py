@@ -2,7 +2,7 @@
 """
 Created on Thu Feb  6 08:42:57 2020
 
-@author: edomene
+@author: valramon
 """
 
 import pandas as pd
@@ -10,16 +10,19 @@ import bokeh
 from bokeh.plotting import figure
 import numpy as np
 from collections import defaultdict
-from bokeh.models import ColumnDataSource, HoverTool, ResetTool, SaveTool, DataTable, TableColumn, BoxZoomTool, OpenURL
-from bokeh.models.widgets import CheckboxGroup, Button, Select, Slider, Div, TextInput, PreText, RangeSlider
+from bokeh.models import ColumnDataSource, HoverTool, ResetTool, SaveTool, DataTable, TableColumn, BoxZoomTool
+from bokeh.models.widgets import CheckboxGroup, Button, Select, Slider, Div, TextInput, RangeSlider
 from bokeh.models.ranges import Range1d
 from bokeh.models import PolyDrawTool
 from bokeh_callbacks_v5 import *
-import os, glob, copy, pickle
-from impar_bokeh import *
-from osciloscopio_bokeh import *
+import os, glob, copy, pickle, shutil
+import sys
 
-def create_figure(n, source_cambia_paginas):
+def create_figure(n):
+    """
+        Esta función recibe un n predeterminado para crear el mapa de zonas. En caso de existir un archivo que ya
+        contenga las zonas, simplemente lo carga y crea el mapa sobre el mismo.
+    """
     #path donde se encuentre el csv con los datos de las zonas
     pathData = 'C:/Users/edomene/Downloads/'
     os.chdir(pathData)
@@ -35,7 +38,7 @@ def create_figure(n, source_cambia_paginas):
             dictHistoricos['id'].append(dataHist[1])
             dictHistoricos['vehi'].append(dataHist[10].encode("ascii"))
             dictHistoricos['progre'].append(round(dataHist[2], 2))
-            dictHistoricos['fecha'].append(dataHist[5].strftime("%d/%m/%Y, %H:%M:%S"))
+            dictHistoricos['fecha'].append(dataHist[5].strftime("%Y/%m/%d, %H:%M:%S"))
             dictHistoricos['estado'].append(dataHist[3])
         except:
             break
@@ -184,7 +187,7 @@ def create_figure(n, source_cambia_paginas):
     p = figure(plot_width=1200, plot_height=600,x_range=(0,x_limit_left), y_range=Range1d(0,49), tools = tools)
     
     #le incrusta la imagen del mapa y crea las lineas de las zonas
-    p.image_url(url=['static/mapa_vm3.jpg'], x=0, y=0, w=x_limit_left, h=49,anchor='bottom_left')
+    p.image_url(url=['static/imgs/mapa_vm3.jpg'], x=0, y=0, w=x_limit_left, h=49,anchor='bottom_left')
     ml=p.multi_line(xs='RT', ys='RT_intensity',  # estas 4 lineas dibujan las lines de las zonas
                  line_width=5, line_color='color', line_alpha=0.7,
                  hover_line_color='pink', hover_line_alpha=1.0,
@@ -199,7 +202,7 @@ def create_figure(n, source_cambia_paginas):
         ('Intensidad relativa', '@rel_int')
     ], renderers = [ml])
     
-    p.add_tools(hover_t)
+#    p.add_tools(hover_t)
     
     #crea los sombreados de las zonas
     poli = p.multi_polygons(xs='x', ys = 'y', color = 'color', line_alpha = 0,fill_alpha = 0.3, source = source_cuadrados)
@@ -220,7 +223,7 @@ def create_figure(n, source_cambia_paginas):
     labels = [zona[1] for zona in lista_zonas]
     
     #crea los callbacks en javascript para cuando el script esta en ejecucion
-    callback_checkbox = checkbox(source, source2_respaldo, source_respaldo, oculta_zonas, x, y)
+    callback_checkbox = checkbox(source, source2_respaldo, source_respaldo, oculta_zonas)
     callback_guarda_zona = guarda_zona(source3)
     callback_evento = evento(source, source3, source_respaldo, source_cuadrados)
     callback_int = intensidad(source, source3, source_respaldo)
@@ -261,17 +264,17 @@ def create_figure(n, source_cambia_paginas):
     div2.visible = False
     
     callback_muestra_eventos_zona = muestra_eventos_zona(source, source_historicos, source_historicos_muestra, data_table, select, div2)
-    callback_muestra_todos_eventos = muestra_todos_eventos(source_cambia_paginas)
+#    callback_muestra_todos_eventos = muestra_todos_eventos(source_cambia_paginas)
     
     boton_muestra_eventos_zona = Button(label='Mostrar ultimos eventos de zona', button_type='success', callback=callback_muestra_eventos_zona)
     boton_muestra_eventos_zona.disabled = True
     
-    buton_muestra_todos_eventos = Div(text="""<a href="/table" style = color: #fff>________Visualizar historicos_______</a>""", width=300, height=30, style={'font-size': '130%', 'color': '#fff', 'background-color': '#5cb85c', 'border-color': '#4cae4c', 'text-align': 'center'})
+#    buton_muestra_todos_eventos = Div(text="""<a href="/table" style = color: #fff>________Visualizar historicos_______</a>""", width=300, height=30, style={'font-size': '130%', 'color': '#fff', 'background-color': '#5cb85c', 'border-color': '#4cae4c', 'text-align': 'center'})
     callback_mouse = mouse_drag(source, source_cuadrados, source3, select, poli, slider_intensidad, input_eventos, eventos_perm, source_respaldo, largo_ducto)
     callback_mouse_end = mouse_end(poli, source_cuadrados, source, largo_ducto, draw_tool_l1, boton_elimina_zona, source_respaldo)
     callback_mouse_move = mouse_move(source, source_respaldo, source_cuadrados)
     callback_tap = tap(source, source_respaldo, source3, source_cuadrados, slider_intensidad, input_eventos, eventos_perm, select, poli, draw_tool_l1, boton_elimina_zona, boton_muestra_eventos_zona, data_table, div2)
-    callback_mouse_guarda = mouse_guarda(source, source_respaldo, source_cuadrados)
+#    callback_mouse_guarda = mouse_guarda(source, source_respaldo, source_cuadrados)
     
     #detecta eventos realizados con mouse en la figura para llamar a callbacks que modificar la figura del mapa
     p.js_on_event(bokeh.events.Tap, callback_tap)
@@ -281,13 +284,18 @@ def create_figure(n, source_cambia_paginas):
     div = Div(text="""Eventos Permitidos:""", width=200, height=10)
     
 #    return p, checkbox_group, select, input_eventos, slider_intensidad, button, button2, div, boton_agregar_zona, text_input_prog_ini, text_input_prog_fin, boton_confirma_zona, boton_elimina_zona
-    return p, checkbox_group, select, input_eventos, slider_intensidad, button, button2, div, div2, data_table, boton_muestra_eventos_zona, buton_muestra_todos_eventos, source_cambia_paginas
+    return p, checkbox_group, select, input_eventos, slider_intensidad, button, button2, div, div2, data_table, boton_muestra_eventos_zona, hover_t
 
 def usuario_activo():
     div = Div(text="""Ya hay un usuario activo""", width=600, height=600)
     return div
 
 def visualiza_historicos():
+    """
+        Esta función carga el archivo de la base de datos y la muestra al usuario en modo de table, permitiendo
+        realizar distintos filtros sobre la misma.
+    """
+    
     pathData = 'C:/Users/edomene/Downloads/'
     os.chdir(pathData)
     archivosCsv = glob.glob('db*.db')
@@ -299,7 +307,7 @@ def visualiza_historicos():
             dictHistoricos['id'].append(dataHist[1])
             dictHistoricos['vehi'].append(dataHist[10].encode("ascii"))
             dictHistoricos['progre'].append(round(dataHist[2], 2))
-            dictHistoricos['fecha'].append(dataHist[5].strftime("%d/%m/%Y, %H:%M:%S"))
+            dictHistoricos['fecha'].append(dataHist[5].strftime("%Y/%m/%d, %H:%M:%S"))
             dictHistoricos['estado'].append(dataHist[3])
         except:
             break
@@ -317,7 +325,7 @@ def visualiza_historicos():
     sourceIteraHistoricos = ColumnDataSource(dataframeIteraCantHistoricos)
     source_todos_historicos = ColumnDataSource(dataframe_historicos)
     source_historicos = ColumnDataSource(copy.deepcopy(dataframe_historicos[:500]))
-    source_historicos_filtrado = ColumnDataSource(copy.deepcopy(dataframe_historicos[:500]))
+    source_historicos_filtrado = ColumnDataSource(copy.deepcopy(dataframe_historicos[:0]))
     del source_historicos.data['index']
     del source_historicos_filtrado.data['index']
     keys = dictHistoricos.keys()
@@ -329,12 +337,12 @@ def visualiza_historicos():
         TableColumn(field='estado', title='Estado')
     ]
         
-    data_table = DataTable(source=source_historicos_filtrado, columns=columns, width=600, height=400, editable=False, reorderable=False)
+    data_table = DataTable(source=source_todos_historicos, columns=columns, width=600, height=400, editable=True, reorderable=False)
+    data_table.source = source_historicos_filtrado
     
-    
-    botonSube = Button(label = "Eventos siguientes", button_type="success")
-    botonBaja = Button(label = "Eventos anteriores", button_type="success")
-    botonBaja.disabled = True
+    botonSube = Button(label = "Cargar eventos", button_type="success")
+    botonBaja = Button(label = "Cargar menos eventos", button_type="success")
+    botonBaja.visible = False
     
     callback_boton_baja = boton_baja(source_todos_historicos, source_historicos, sourceIteraHistoricos, data_table, botonSube)
     callback_boton_sube = boton_sube(source_todos_historicos, source_historicos, sourceIteraHistoricos, data_table, botonBaja)
@@ -370,45 +378,46 @@ def visualiza_historicos():
                 j += 1
             j = 0
         dic_datos_lineas = dictData
+    pkIni = float(dic_datos_lineas['ProgresivaIni'][0].split('pk')[1])
+    pkFin = float(dic_datos_lineas['ProgresivaFin'][-1].split('pk')[1])
     dic_filtros = {}
-    dic_filtros['rango_pk'] = [(338,368)]
-    dic_filtros['rango_fecha']  = [0]
-    dic_filtros['estado'] = [list(np.unique(source_historicos.data['estado']))]
-    dic_filtros['vehiculo'] = [list(np.unique(source_historicos.data['vehi']))]
+    dic_filtros['rango_pk'] = [(pkIni,pkFin)]
+    dic_filtros['rango_fecha']  = [[dictHistoricos['fecha'][0].split(',')[0] ,dictHistoricos['fecha'][-1].split(',')[0] ]]
+    dic_filtros['estado'] = [list(np.unique(source_todos_historicos.data['estado']))]
+    dic_filtros['vehiculo'] = [list(np.unique(source_todos_historicos.data['vehi']))]
     dic_filtros['id'] = [1]
     dataframe_filtros = pd.DataFrame(dic_filtros)
     source_filtros = ColumnDataSource(dataframe_filtros)
-    callback_filtra_rango_pk = filtra_rango_pk(source_historicos, source_historicos_filtrado, data_table, source_filtros)
-    callback_filtra_vehiculos = filtra_vehiculos(source_historicos, source_historicos_filtrado, data_table, source_filtros)
-    callback_filtra_estado = filtra_estado(source_historicos, source_historicos_filtrado, data_table, source_filtros)
-    callback_filtra_id = filtra_id(source_historicos, source_historicos_filtrado, data_table, source_filtros)
-    pkIni = float(dic_datos_lineas['ProgresivaIni'][0].split('pk')[1])
-    pkFin = float(dic_datos_lineas['ProgresivaFin'][-1].split('pk')[1])
+    callback_filtra_rango_pk = filtra_rango_pk(source_todos_historicos, source_historicos_filtrado, data_table, source_filtros)
+    callback_filtra_vehiculos = filtra_vehiculos(source_todos_historicos, source_historicos_filtrado, data_table, source_filtros)
+    callback_filtra_estado = filtra_estado(source_todos_historicos, source_historicos_filtrado, data_table, source_filtros)
+    callback_filtra_id = filtra_id(source_todos_historicos, source_historicos_filtrado, data_table, source_filtros)
+    
+    callback_filtra_fecha_ini = filtra_fecha_ini(source_filtros)
+    callback_filtra_fecha_fin = filtra_fecha_fin(source_filtros)
+    callback_filtra_fecha = filtra_fecha(source_todos_historicos, source_historicos_filtrado, data_table, source_filtros)
+    
     range_slider = RangeSlider(start=pkIni, end=pkFin, value=(pkIni,pkFin), step=.1, title="Filtrar por progresivas", callback=callback_filtra_rango_pk)
     div = Div(text="""Filtrar por vehiculos:""", width=200, height=10)
-    checkbox_eventos = CheckboxGroup(labels=list(np.unique(source_historicos.data['vehi'])), active=[x for x in range(len(list(np.unique(source_historicos.data['vehi']))))], callback = callback_filtra_vehiculos)
+    checkbox_eventos = CheckboxGroup(labels=list(np.unique(source_todos_historicos.data['vehi'])), active=[x for x in range(len(list(np.unique(source_historicos.data['vehi']))))], callback = callback_filtra_vehiculos)
     div2 = Div(text="""Filtrar por estado:""", width=200, height=10)
-    checkbox_estado = CheckboxGroup(labels=list(np.unique(source_historicos.data['estado'])), active=[x for x in range(len(list(np.unique(source_historicos.data['estado']))))], callback = callback_filtra_estado)
+    checkbox_estado = CheckboxGroup(labels=list(np.unique(source_todos_historicos.data['estado'])), active=[x for x in range(len(list(np.unique(source_historicos.data['estado']))))], callback = callback_filtra_estado)
     filtro_id = TextInput(value='', title='Filtrar por id:', callback = callback_filtra_id)
     
-    return data_table, boton_vuelve, range_slider, checkbox_eventos, div, checkbox_estado, div2, filtro_id, botonSube, botonBaja
+    filtro_fecha_ini = TextInput(title='Fecha inicial a filtrar', value='AAAA/MM/DD', height=50, width=200, callback=callback_filtra_fecha_ini)
+    filtro_fecha_fin = TextInput(title='Fecha final a filtrar', value='AAAA/MM/DD', height=50, width=200, callback=callback_filtra_fecha_fin)
+    
+    boton_filtra_fecha = Button(label = "Filtrar fechas", button_type="success", callback=callback_filtra_fecha)
+    
+    return data_table, boton_vuelve, range_slider, checkbox_eventos, div, checkbox_estado, div2, filtro_id, botonSube, botonBaja, filtro_fecha_ini, filtro_fecha_fin, boton_filtra_fecha
     
 def visualiza_estado():
-#    divTemp = Div(text="""<h3>Temperatura del laser:</h3>""", width=200, height=50)
-#    divTens = Div(text="""<h3>Tension del laser:</h3>""", width=200, height=50)
-#    divC = Div(text="""<h3>°C</h3>""", width=200, height=50)
-#    divV = Div(text="""<h3>V</h3>""", width=200, height=50)
-#    divSnr = Div(text="""<h3>Relacion senial ruido:</h3>""", width=200, height=50)
-#    temp = TextInput(value=str(round(np.random.uniform(low=23.0, high=25.0), 2)), title='', height=50, width=100)
-#    tens = TextInput(value=str(round(np.random.uniform(low=2.4, high=2.6), 2)), title='', height=50, width=100)
-#    snr = TextInput(value=str(round(np.random.uniform(low=275, high=325), 2)), height=50, width=100)
-#    temp.disabled = True
-#    tens.disabled = True
-#    snr.disabled = True
-#    fig.savefig('C:/Users/edomene/Downloads/bokeh_flask/bokeh_flask/static/prueba.png')
+    """
+        Esta función crea dos figuras de bokeh y va tomando las imágenes del estado del equipo para mostrarlas.
+    """
     tools=[]
     p = figure(plot_width=600, plot_height=400,x_range=(0,1), y_range=Range1d(0,49), tools = tools)
-    os.chdir('C:/Users/edomene/Downloads/bokeh_flask/bokeh_flask/static/estado')
+    os.chdir('C:/Users/edomeneDownloads/bokeh_flask_ultimo/bokeh_flask_ultimo/static/estado')
     imagenes_wf = glob.glob('impar*.png')
 #    p.image_rgba(image=[fig], x=0, y=0, dw=10, dh=10)
     p.image_url(url=['static/estado/'+imagenes_wf[-1]], x=0, y=0, w=1, h=49,anchor='bottom_left')
@@ -416,7 +425,7 @@ def visualiza_estado():
     p.yaxis.visible = False
     
     p2 = figure(plot_width=600, plot_height=400,x_range=(0,1), y_range=Range1d(0,49), tools = tools)
-    os.chdir('C:/Users/edomene/Downloads/bokeh_flask/bokeh_flask/static/estado')
+    os.chdir('C:/Users/edomeneDownloads/bokeh_flask_ultimo/bokeh_flask_ultimo/static/estado')
     imagenes_wf = glob.glob('osciloscopio*.png')
 #    p.image_rgba(image=[fig], x=0, y=0, dw=10, dh=10)
     p2.image_url(url=['static/estado/'+imagenes_wf[-1]], x=0, y=0, w=1, h=49,anchor='bottom_left')
@@ -426,16 +435,21 @@ def visualiza_estado():
     return p, p2
     
 def visualiza_waterfall():
+    """
+        Esta función crea una figura de bokeh y va tomando las imágenes del waterfall para mostrarlas.
+    """
     tools = []
     p = figure(plot_width=1200, plot_height=600,x_range=(0,1), y_range=Range1d(0,49), tools = tools)
     p.xaxis.visible = False
     p.yaxis.visible = False
-    os.chdir('C:/Users/edomene/Downloads/bokeh_flask/bokeh_flask/static/')
-    imagenes_wf = glob.glob('wf_prueba*.jpg')
-    indice_muestra = np.random.randint(low = 0, high = len(imagenes_wf) - 1)
-    img_muestra = imagenes_wf[indice_muestra]
-    
+    source = '/wf_web_vm/imagen_actual.jpg'
+    destination = os.environ['USERPROFILE']+'/Downloads/bokeh_flask_ultimo/bokeh_flask_ultimo/static/wf/'+str(np.random.randint(0, high = sys.maxint))+'.png'
+    os.chdir( os.environ['USERPROFILE']+'/Downloads/bokeh_flask/bokeh_flask/static/wf')
+    imagenes_wf = glob.glob('*.png')
+    os.remove(imagenes_wf[-1])
+    shutil.copyfile(source, destination)
+    imagenes_wf = glob.glob('*.png')
     #le incrusta la imagen del mapa y crea las lineas de las zonas
-    p.image_url(url=['static/'+img_muestra], x=0, y=0, w=1, h=49,anchor='bottom_left')
+    p.image_url(url=['static/'+imagenes_wf[-1]], x=0, y=0, w=1, h=49,anchor='bottom_left')
     
     return p
