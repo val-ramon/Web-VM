@@ -19,7 +19,6 @@ def miraArchivos(*args):
     global archVistos, archNuevo, hayArchNuevo
     while True:
         pathData = os.environ['USERPROFILE']+'/Downloads/'
-#        os.chdir(pathData)
         archivosCsv = glob.glob(pathData + 'change_emmited*.csv')
         archNuevo = ''
         for archivo in archivosCsv:
@@ -37,10 +36,9 @@ miroArchNuevoThread.setDaemon(True)
 miroArchNuevoThread.start()
 
 pathData = os.environ['USERPROFILE']+'/Downloads/'
-#os.chdir(pathData)
 while True:
     if hayArchNuevo:
         source = pathData + archNuevo
-        destination = os.environ['USERPROFILE']+'Downloads/bokeh_flask_ultimo/bokeh_flask_ultimo/' + archNuevo
+        destination = os.environ['USERPROFILE']+'Downloads/bokeh_flask/bokeh_flask_vm/' + archNuevo
         shutil.copy(source, destination)
         os.remove(source)
