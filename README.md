@@ -11,3 +11,5 @@
 # A su vez en VM se encuentra un script que descarga la base de datos periódicamente.
 
 # 'generador3.py' sirve para la traza de VM en Google Earth.
+
+# Es necesario que las carpetas '/static/estado' y '/static/wf' estén vacías ya que los programas realizan por sí solos las acciones con las imágenes
