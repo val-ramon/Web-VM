@@ -1,4 +1,7 @@
+// Primero crea una funcion que sirve para transformar un data source en un string con formato para csv
 function table_to_csv(source) {
+    /*Esta funcion columna por columna y las concatena con comas, a su vez concatena cada fila con saltos de linea,
+        esto es para poder lograr un formato legible y crear un archivo csv.*/
     var columns = Object.keys(source.data);
     const nrows = source.get_length();
     var lugar = columns.indexOf("RT_intensity");
@@ -27,11 +30,13 @@ function table_to_csv(source) {
     return lines.join('\\n').concat('\\n');
 }
 
+// Crea el archivo csv con los datos de las zonas para poder descargarlo desde el navegador
 const filename = 'change_emmited.csv';
 var filetext = table_to_csv(source);
 filetext = filetext.slice(0, filetext.length - 1);
 const blob = new Blob([filetext], { type: 'text/csv;charset=utf-8;' });
 
+// Crea un objeto de URL para poder descargar el archivo con los datos de la zonas
 //addresses IE
 if (navigator.msSaveBlob) {
     navigator.msSaveBlob(blob, filename);
