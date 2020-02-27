@@ -1,6 +1,10 @@
-var s_data_respaldo = source_respaldo.data;
-var s_data_cuadrados = source_cuadrados.data;
-var s_data = source.data;
+// Los sources los recibe desde Python como parametros
+
+var s_data_respaldo = source_respaldo.data; // Toma la data del source de respaldo
+var s_data_cuadrados = source_cuadrados.data; // Toma la data del source del sombreado de zonas
+var s_data = source.data; // Toma la data del source que contiene la informacion de las zonas
+
+// Esto sirve para poder hacer un respaldo de la data anterior de las zonas en caso de querer deshacer cambios
 if(s_data_cuadrados.cont[0] === 0){
     s_data_cuadrados.cont[0] = 1;
     s_data_respaldo.rel_int = s_data.rel_int.slice();
