@@ -1,4 +1,9 @@
-var s_data = source.data;        
+// Los datos de los sources llegan desde Python como parametros
+
+var s_data = source.data; // Toma la data del source original para poder eliminar zonas
+
+/* Se fija que zona esta seleccionada y recorre el source de las zonas para encontrar la zona a eliminar y borra todos los datos que se
+    encuentren en ese indice*/
 for (var m = 0; m < source.data.RT.length; m++){
     if (s_data.Intensity_tip[m] === select.value){
         s_data.RT.splice(m, 1);
@@ -19,6 +24,8 @@ for (var m = 0; m < source.data.RT.length; m++){
         break;
     }
 }
+
+/* Recorre todo el source del sombreado de zonas para modificar las nuevas coordenadas, ademas de actualizar las progresivas de las zonas*/
 var largo = s_data.RT.length;
     for (var i = 0; i < largo; i++){
         if (i !== 0){
@@ -36,4 +43,5 @@ var largo = s_data.RT.length;
         var suma = (s_data.RT[i][0] - 510)/1000 + 338;
         s_data.ProgresivaFin[i] = 'pk' + ((suma.toFixed(2).toString()));
     }
-source.change.emit();
+
+source.change.emit(); // Emite los cambios en el source de datos de las zonas
