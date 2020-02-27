@@ -1,1 +1,0 @@
-# Requerimientos para aplicacion bokeh
