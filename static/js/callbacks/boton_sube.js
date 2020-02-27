@@ -1,7 +1,7 @@
 // La tabla y los sources que contienen los datos de la base de datos llegan desde Python como parametros
 
 data_table.visible = false; // Oculta la tabla momentaneamente para simular actualizacion en tiempo real y mostrar nuevos datos
-sourceIteraHistoricos.data.cont[0]++;
+sourceIteraHistoricos.data.cont[0]++; // Suma el contador para saber donde esta parado en cantidad de eventos
 botonBaja.visible = true; // Activa el boton para visualizar menos eventos una vez que se cargan los mismos en la tabla
 cb_obj['label'] = 'Cargar mas eventos';
 
