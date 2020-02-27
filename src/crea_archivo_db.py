@@ -30,7 +30,7 @@ while True:
         print ('escribiendo archivo db...')
         for row in crs.fetchall():
             #print row imprime todos los campos
-            fileO = open(os.environ['USERPROFILE']+'Downloads/bokeh_flask_ultimo/bokeh_flask_vm/static/config/db.db', 'a')
+            fileO = open(os.environ['USERPROFILE']+'Downloads/bokeh_flask_ultimo/bokeh_flask_vm/static/config/db.db', 'ab')
             pickle.dump(row, fileO)
             fileO.close()
         print ('finalizado.')
