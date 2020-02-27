@@ -10,6 +10,7 @@ import os
 import shutil
 import glob
 import threading
+import time
 
 archVistos = []
 archNuevo = ''
@@ -18,17 +19,26 @@ hayArchNuevo = False
 def miraArchivos(*args):
     global archVistos, archNuevo, hayArchNuevo
     while True:
-        pathData = os.environ['USERPROFILE']+'/Downloads/'
-        archivosCsv = glob.glob(pathData + 'change_emmited*.csv')
-        archNuevo = ''
-        for archivo in archivosCsv:
-            if archivo not in archVistos:
-                archNuevo = archivo
-                archVistos.append(archivo)
-                hayArchNuevo = True
-                
-        if hayArchNuevo:
-            print (archNuevo)
+        try:
+            pathData = os.environ['USERPROFILE']+'/Downloads/'
+            os.chdir(pathData)
+            archivosCsv = glob.glob('change_emmited*.csv')
+            archNuevo = ''
+            for archivo in archivosCsv:
+                if archivo not in archVistos:
+                    archNuevo = archivo
+                    archVistos.append(archivo)
+                    hayArchNuevo = True
+                    
+            if hayArchNuevo:
+                source = archNuevo
+                destination = os.environ['USERPROFILE']+'/Downloads/bokeh_flask/bokeh_flask_vm/' + archNuevo
+                shutil.copy(source, destination)
+                os.remove(source)
+                archVistos.remove(source)
+                hayArchNuevo = False
+        except:
+            pass
         
     
 miroArchNuevoThread = threading.Thread(target=miraArchivos)
@@ -36,9 +46,8 @@ miroArchNuevoThread.setDaemon(True)
 miroArchNuevoThread.start()
 
 pathData = os.environ['USERPROFILE']+'/Downloads/'
+
 while True:
     if hayArchNuevo:
-        source = pathData + archNuevo
-        destination = os.environ['USERPROFILE']+'Downloads/bokeh_flask/bokeh_flask_vm/static/config/' + archNuevo
-        shutil.copy(source, destination)
-        os.remove(source)
+        time.sleep(1)
+        print('Archivo movido de configuracion de zonas movido.')
