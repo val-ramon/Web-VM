@@ -10,7 +10,6 @@ import pickle, os
 
 #login db
 while True:
-    time.sleep(180)
     sv="SWPLPGLPAPL07"
     db="Y-NTEGRO"
     uid="yntegro"
@@ -37,3 +36,4 @@ while True:
     except:
         pass
     cnxn.close()
+    time.sleep(180)
