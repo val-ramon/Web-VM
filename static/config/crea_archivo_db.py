@@ -26,11 +26,11 @@ while True:
     crs=cnxn.cursor() #mejor adentro de with cnxn.cursor() as crs:
     crs.execute(select_qry)
     try:
-        os.remove('C:/Users/ybl0550/Downloads/db.db')
+        os.remove('C:/Users/ybl0550/Downloads/bokeh_flask_ultimo/bokeh_flask_vm/static/config/db.db')
         print ('escribiendo archivo db...')
         for row in crs.fetchall():
             #print row imprime todos los campos
-            fileO = open(os.environ['USERPROFILE']+'Downloads/bokeh_flask_ultimo/bokeh_flask_vm/db.db', 'a')
+            fileO = open(os.environ['USERPROFILE']+'Downloads/bokeh_flask_ultimo/bokeh_flask_vm/static/config/db.db', 'a')
             pickle.dump(row, fileO)
             fileO.close()
         print ('finalizado.')
