@@ -39,6 +39,6 @@ pathData = os.environ['USERPROFILE']+'/Downloads/'
 while True:
     if hayArchNuevo:
         source = pathData + archNuevo
-        destination = os.environ['USERPROFILE']+'Downloads/bokeh_flask/bokeh_flask_vm/' + archNuevo
+        destination = os.environ['USERPROFILE']+'Downloads/bokeh_flask/bokeh_flask_vm/static/config/' + archNuevo
         shutil.copy(source, destination)
         os.remove(source)
