@@ -42,14 +42,14 @@ def create_map(n):
             else:
                 dataHist = pickle.load(fileO, encoding = 'bytes')
             dictHistoricos['id'].append(dataHist[1])
-            dictHistoricos['vehi'].append(dataHist[10].encode("ascii"))
+            dictHistoricos['vehi'].append(dataHist[10])
             dictHistoricos['progre'].append(round(dataHist[2], 2))
             dictHistoricos['fecha'].append(dataHist[5].strftime("%Y/%m/%d, %H:%M:%S"))
             dictHistoricos['estado'].append(dataHist[3])
         except:
             break
     for i in range(len(dictHistoricos['vehi'])):
-        dictHistoricos['vehi'][i] = str(dictHistoricos['vehi'][i].decode())
+        dictHistoricos['vehi'][i] = str(dictHistoricos['vehi'][i])
         dictHistoricos['id'][i] = str(dictHistoricos['id'][i])
         dictHistoricos['progre'][i] = str(dictHistoricos['progre'][i])
         dictHistoricos['fecha'][i] = str(dictHistoricos['fecha'][i])
