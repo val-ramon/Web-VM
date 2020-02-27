@@ -1,9 +1,16 @@
-var progreIni = 'pk' + text_input_prog_ini.value;
-var progreFin = 'pk' + text_input_prog_fin.value;
+// Todos los datos de los sources llegan por parametro desde Python
+
+var progreIni = 'pk' + text_input_prog_ini.value; // Toma el valor de progresiva inicial puesto en el input
+var progreFin = 'pk' + text_input_prog_fin.value; // Toma el valor de progresiva final puesto en el input
+
+// Toma todos los datos de los sources y los guarda en variables para poder trabajar sobre ellos
 var s_data = source.data;
 var s_data_respaldo = source_respaldo.data;
 var s_data_cuadrados = source_cuadrados.data;
+
 var rel_int_ant = 0
+
+// Crea una funcion range, ya que en JS no existe
 function range(start, end) {
     var ans = [];
     for (let i = start; i <= end; i++) {
@@ -11,10 +18,13 @@ function range(start, end) {
     }
     return ans;
 } 
+
 var i = 0;
 var k = 0;
-var ultimo = s_data.Eventos_permitidos.length;
-var largoFinal = s_data.RT.length + 2;
+var ultimo = s_data.Eventos_permitidos.length; // Se fija cuanto es el largo antes de realizar cambios
+var largoFinal = s_data.RT.length + 2; // A esto le suma 2, ya que tecnicamente se le agregan dos lineas al source de zonas
+
+/* Primero se fija si existen zonas comprendidas entre las progresivas ingresadas, en caso de que existan, las elimina para setear las nuevas zonas*/
 if (!(s_data.ProgresivaFin.includes(progreFin + '.00')) && !(s_data.ProgresivaIni.includes(progreIni + '.00'))){
     for (var m = 0; m < ultimo; m++){
         console.log(s_data.ProgresivaFin[m].split('pk')[1])
@@ -38,8 +48,11 @@ if (!(s_data.ProgresivaFin.includes(progreFin + '.00')) && !(s_data.ProgresivaIn
             break;
         }
     }
+    /* Como se sabe que se agregan dos zonas, se hace un bucle 'infinito', en el cual se recorre todo el source de datos de zonas para encontrar
+        donde debe ir cada zona, primero se fija por la progresiva final, contrastando con la progresiva mas alta, luego mueve todos los datos
+        una posicion. Una vez hecho esto, hace lo mismo con la progresiva inicial.*/
     while(k < 2){
-        console.log(i)
+
         if (k === 0){
             if ((parseInt(s_data.ProgresivaFin[i].split('pk')[1]) > parseInt(progreFin.split('pk')[1]))){
                 for (var j = ultimo; j > i; j--){
@@ -151,6 +164,8 @@ if (!(s_data.ProgresivaFin.includes(progreFin + '.00')) && !(s_data.ProgresivaIn
         }
         i++;
     }
+    /* Aqui comprueba que el source de sombreado de zonas tenga las mismas coordenadas, caso contrario, las modifica oara que las zonas sean
+        visibles correctamente, ademas de actualizar las progresivas*/
     var largoActual = s_data.RT.length;
     var largo = s_data.RT.length;
     for (var i = 0; i < largo; i++){
@@ -170,6 +185,8 @@ if (!(s_data.ProgresivaFin.includes(progreFin + '.00')) && !(s_data.ProgresivaIn
         var suma = (s_data.RT[i][0] - 510)/1000 + 338;
         s_data.ProgresivaFin[i] = 'pk' + ((suma.toFixed(2).toString()));
     }
+
+     // Emite los cambios en los sources y muestra en el select las zonas actualizadas
     source_cuadrados.change.emit();
     select.options = s_data.Intensity_tip;
     source.change.emit();
