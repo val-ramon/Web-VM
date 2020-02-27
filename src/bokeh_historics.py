@@ -19,7 +19,7 @@ def visualiza_historicos():
         realizar distintos filtros sobre la misma.
     """
     
-    pathData = os.environ['USERPROFILE']+'/Downloads/bokeh_flask/bokeh_flask_vm/'
+    pathData = os.environ['USERPROFILE']+'/Downloads/bokeh_flask/bokeh_flask_vm/static/config/'
     archivosDb = glob.glob(pathData + '*.db')
     dictHistoricos = defaultdict(list)
     pyVersion = platform.python_version()
