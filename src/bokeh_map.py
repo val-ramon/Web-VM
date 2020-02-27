@@ -23,7 +23,7 @@ def create_map(n):
         contenga las zonas, simplemente lo carga y crea el mapa sobre el mismo.
     """
     #path donde se encuentre el csv con los datos de las zonas
-    pathData = os.environ['USERPROFILE']+'/Downloads/bokeh_flask/bokeh_flask_vm/'
+    pathData = os.environ['USERPROFILE']+'/Downloads/bokeh_flask/bokeh_flask_vm/static/config/'
 
     archivosCsv = glob.glob(pathData + '*.csv')
     dic_cuadrados = defaultdict(list)
