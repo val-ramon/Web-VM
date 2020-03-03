@@ -188,7 +188,7 @@ def map_zones():
         layout_b = layout(row(p, layout(div2, data_table)), row(select, layout(div,input_eventos, slider_intensidad), layout(button, boton_muestra_eventos_zona, button2), checkbox_group))
         # Embed plot into HTML via Flask Render
         script, div = components(layout_b)
-        return render_template("iris_index3.html", script=script, div=div,
+        return render_template("index_map_autorizados.html", script=script, div=div,
                 feature_names=feature_names,  current_feature_name=current_feature_name)
     else:
         current_feature_name = request.args.get("feature_name")
@@ -209,5 +209,5 @@ def map_zones():
         layout_b = layout(row(p, layout(div2, data_table)), row(select, layout(div,input_eventos, slider_intensidad), layout(button, boton_muestra_eventos_zona, button2), checkbox_group))
         # Embed plot into HTML via Flask Render
         script, div = components(layout_b)
-        return render_template("iris_index4.html", script=script, div=div,
+        return render_template("index_map_no_autorizados.html", script=script, div=div,
                 feature_names=feature_names,  current_feature_name=current_feature_name)
