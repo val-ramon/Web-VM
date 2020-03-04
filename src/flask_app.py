@@ -19,7 +19,7 @@ import threading
 import os
 
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder = '../templates', static_folder = '../static')
 contActivos = 0
 feature_names = ['15']
 ips = {}
