@@ -50,4 +50,4 @@ pathData = os.environ['USERPROFILE']+'/Downloads/'
 while True:
     if hayArchNuevo:
         time.sleep(1)
-        print('Archivo movido de configuracion de zonas movido.')
+        print('Archivo de configuracion de zonas movido.')
