@@ -147,8 +147,8 @@ def table_historics():
         ips[ip] = time.time()
     else:
         ips[ip] = time.time()
-    data_table, range_slider, checkbox_eventos, div, checkbox_estado, div2, filtro_id, boton_sube, boton_baja, filtro_fecha_ini, filtro_fecha_fin, boton_filtra_fecha = visualiza_historicos()
-    script, div = components(layout(row(layout(data_table, boton_sube, boton_baja), layout(range_slider, div, checkbox_eventos, div2, checkbox_estado, filtro_id, filtro_fecha_ini, filtro_fecha_fin, boton_filtra_fecha))))
+    data_table, range_slider, checkbox_eventos, div, checkbox_estado, div2, filtro_id, div_id, boton_sube, boton_baja, filtro_fecha_ini, div_fecha_i, filtro_fecha_fin, div_fecha_f, div_filtro_fecha, boton_filtra_fecha = visualiza_historicos()
+    script, div = components(layout(row(layout(data_table, boton_sube, boton_baja), layout(range_slider, div, checkbox_eventos, div2, checkbox_estado, div_id, filtro_id, div_fecha_i, filtro_fecha_ini, div_fecha_f, filtro_fecha_fin, div_filtro_fecha, boton_filtra_fecha))))
     return render_template("historicos.html", script=script, div=div)
 
 
