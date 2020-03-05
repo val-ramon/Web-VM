@@ -125,16 +125,20 @@ def visualiza_historicos():
     callback_filtra_fecha = filtra_fecha(source_todos_historicos, source_historicos_filtrado, data_table, source_filtros)
     
     range_slider = RangeSlider(start=pkIni, end=pkFin, value=(pkIni,pkFin), step=.1, title="Filtrar por progresivas", callback=callback_filtra_rango_pk)
-    div = Div(text="""Filtrar por vehiculos:""", width=200, height=10)
+    div = Div(text="""<b>Filtrar por vehiculos:</b>""", width=200, height=10)
     checkbox_eventos = CheckboxGroup(labels=list(np.unique(source_todos_historicos.data['vehi'])), active=[x for x in range(len(list(np.unique(source_historicos.data['vehi']))))], callback = callback_filtra_vehiculos)
-    div2 = Div(text="""Filtrar por estado:""", width=200, height=10)
+    div2 = Div(text="""<b>Filtrar por estado:</b>""", width=200, height=10)
     checkbox_estado = CheckboxGroup(labels=list(np.unique(source_todos_historicos.data['estado'])), active=[x for x in range(len(list(np.unique(source_historicos.data['estado']))))], callback = callback_filtra_estado)
-    filtro_id = TextInput(value='', title='Filtrar por id:', callback = callback_filtra_id)
-    
-    filtro_fecha_ini = TextInput(title='Fecha inicial a filtrar', value='AAAA/MM/DD', height=50, width=200, callback=callback_filtra_fecha_ini)
-    filtro_fecha_fin = TextInput(title='Fecha final a filtrar', value='AAAA/MM/DD', height=50, width=200, callback=callback_filtra_fecha_fin)
-    
+    div_id = Div(text = '<b>Filtrar por id:</b>', width=200, height=10)
+    filtro_id = TextInput(value='', callback = callback_filtra_id)
+
+    div_fecha_i = Div(text = '<b>Fecha inicial a filtrar:</b>', width=200, height=10)
+    filtro_fecha_ini = TextInput(value='AAAA/MM/DD', width=200, callback=callback_filtra_fecha_ini)
+    div_fecha_f = Div(text = '<b>Fecha final a filtrar:</b>', width=200, height=10)
+    filtro_fecha_fin = TextInput(value='AAAA/MM/DD', width=200, callback=callback_filtra_fecha_fin)
+
+    div_filtro_fecha = Div(text="""<b class = 'adver'>Advertencia:</b> El formato de fechas debe ser <b>AAAA/MM/DD</b> para un filtrado correcto""", width=200, height=60, css_classes = ['div_adver'])
+
     boton_filtra_fecha = Button(label = "Filtrar fechas", button_type="success", callback=callback_filtra_fecha)
-    
-    return data_table, range_slider, checkbox_eventos, div, checkbox_estado, div2, filtro_id, botonSube, botonBaja, filtro_fecha_ini, filtro_fecha_fin, boton_filtra_fecha
-    
+
+    return data_table, range_slider, checkbox_eventos, div, checkbox_estado, div2, filtro_id, div_id, botonSube, botonBaja, filtro_fecha_ini, div_fecha_i, filtro_fecha_fin, div_fecha_f, div_filtro_fecha, boton_filtra_fecha
