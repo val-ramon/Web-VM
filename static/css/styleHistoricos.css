@@ -53,3 +53,9 @@ li {
 li:last-child {
   border-left: 1px solid #bbb;
 }
+.div_adver {
+  background-color: yellow;
+}
+.adver {
+  color: red;
+}
