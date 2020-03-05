@@ -4,10 +4,26 @@ var value_slider = source_filtros.data.rango_pk[0]; // Recibe valores del range 
 var data = cb_obj.active.map(function(x){ return cb_obj.labels[x];}); // Mapea las celdas seleccionadas en el checkbox para poder buscar y filtrar
 source_filtros.data.vehiculo[0] = data; // Le asigna la data de los vehiculos al source de filtros para poder utilizarlo en los demas filtros
 
-// Toma los valores de string de fechas, las separa por las barras y la convierte a formato Date para poder trabajar con ellas
-var fechaIni = new Date(source_filtros.data.rango_fecha[0][0].split('/'));
-var fechaFin = new Date(source_filtros.data.rango_fecha[0][1].split('/'));
+var fechaIni;
+var fechaFin;
+var fechaI;
+var fechaF;
+// Toma las fechas del source de filtros, la separa por barras y las transforma en formato Date para poder realizar operaciones
+if (source_filtros.data.rango_fecha[0][0].includes('/')){
+    fechaI = source_filtros.data.rango_fecha[0][0].split('/');
+}
+else {
+    fechaI = source_filtros.data.rango_fecha[0][0].split('-');
+}
+if (source_filtros.data.rango_fecha[0][1].includes('/')){
+    fechaF = source_filtros.data.rango_fecha[0][1].split('/');
+}
+else {
+    fechaF = source_filtros.data.rango_fecha[0][1].split('-');
+}
 
+fechaIni = new Date(fechaI[0], fechaI[1], fechaI[2]);
+fechaFin = new Date(fechaF[0], fechaF[1], fechaF[2]);
 data_table.visible = false; // Hace invisible la tabla por un momento para simular actualizacion en tiempo real
 var j = 0;
 
@@ -20,8 +36,10 @@ source_historicos_filtrado.data.estado = [];
 
 /* Recorre todo el source de la base de datos buscando coincidencias entre valores, en caso de que se de dicha coincidencia, se va agregando
     al source que se usa para mostrar los datos filtrados*/
+var fechaCompara;
 for (var i = 0; i < source_historicos.data.progre.length; i++){
-    if (parseInt(source_historicos.data.progre[i]) >= value_slider[0] && parseInt(source_historicos.data.progre[i]) <= value_slider[1] && data.includes(source_historicos.data.vehi[i]) && source_filtros.data.estado[0].includes(source_historicos.data.estado[i]) && (new Date(source_historicos.data.fecha[i].split(',')[0].split('/')) <= fechaFin && new Date(source_historicos.data.fecha[i].split(',')[0].split('/')) >= fechaIni)){
+    fechaCompara = source_historicos.data.fecha[i].split(',')[0].split('/');
+    if (parseInt(source_historicos.data.progre[i]) >= value_slider[0] && parseInt(source_historicos.data.progre[i]) <= value_slider[1] && data.includes(source_historicos.data.vehi[i]) && source_filtros.data.estado[0].includes(source_historicos.data.estado[i]) && (new Date(fechaCompara[0], fechaCompara[1], fechaCompara[2]) <= fechaFin && new Date(fechaCompara[0], fechaCompara[1], fechaCompara[2]) >= fechaIni)){
         source_historicos_filtrado.data.id[j] = source_historicos.data.id[i];
         source_historicos_filtrado.data.progre[j] = source_historicos.data.progre[i];
         source_historicos_filtrado.data.fecha[j] = source_historicos.data.fecha[i];
