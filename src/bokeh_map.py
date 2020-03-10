@@ -23,12 +23,12 @@ def create_map(n):
         contenga las zonas, simplemente lo carga y crea el mapa sobre el mismo.
     """
     #path donde se encuentre el csv con los datos de las zonas
-    pathData = os.environ['USERPROFILE']+'/Downloads/bokeh_flask/bokeh_flask_vm/'
+    pathData = os.environ['USERPROFILE']+'/Downloads/bokeh_flask/bokeh_flask_vm/static/config/'
 
-    archivosCsv = glob.glob(pathData + 'change_emmited*.csv')
+    archivosCsv = glob.glob(pathData + '*.csv')
     dic_cuadrados = defaultdict(list)
     
-    archivosDb = glob.glob(pathData + 'db*.db')
+    archivosDb = glob.glob(pathData + '*.db')
     dictHistoricos = defaultdict(list)
     with open(archivosDb[-1], 'rb') as fileO:
         try:
@@ -269,4 +269,3 @@ def create_map(n):
     div = Div(text="""Eventos Permitidos:""", width=200, height=10)
     
     return p, checkbox_group, select, input_eventos, slider_intensidad, button, button2, div, div2, data_table, boton_muestra_eventos_zona, hover_t
-
