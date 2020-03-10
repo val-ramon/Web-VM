@@ -19,34 +19,21 @@ def visualiza_historicos():
         realizar distintos filtros sobre la misma.
     """
     
-    pathData = os.environ['USERPROFILE']+'/Downloads/bokeh_flask/bokeh_flask_vm/static/config/'
-    archivosDb = glob.glob(pathData + '*.db')
+    pathData = os.environ['USERPROFILE']+'/Downloads/bokeh_flask/bokeh_flask_vm/'
+    archivosDb = glob.glob(pathData + 'db*.db')
     dictHistoricos = defaultdict(list)
-    pyVersion = platform.python_version()
-    if (int(pyVersion[0]) == 2):
-        fileO = open(archivosDb[-1], 'r')
-    else:
-        fileO = open(archivosDb[-1], 'rb')
-    while True:
+
+    with open(archivosDb[-1], 'rb') as fileO:
         try:
-            if (int(pyVersion[0]) == 2):
-                dataHist = pickle.load(fileO)
-            else:
-                dataHist = pickle.load(fileO, encoding = 'bytes')
-            dictHistoricos['id'].append(dataHist[1])
-            dictHistoricos['vehi'].append(dataHist[10])
-            dictHistoricos['progre'].append(round(dataHist[2], 2))
-            dictHistoricos['fecha'].append(dataHist[5].strftime("%Y/%m/%d, %H:%M:%S"))
-            dictHistoricos['estado'].append(dataHist[3])
+            dataHist = pickle.load(fileO)
         except:
-            break
-    for i in range(len(dictHistoricos['vehi'])):
-        dictHistoricos['vehi'][i] = str(dictHistoricos['vehi'][i])
-        dictHistoricos['id'][i] = str(dictHistoricos['id'][i])
-        dictHistoricos['progre'][i] = str(dictHistoricos['progre'][i])
-        dictHistoricos['fecha'][i] = str(dictHistoricos['fecha'][i])
-        dictHistoricos['estado'][i] = str(dictHistoricos['estado'][i])
-    fileO.close()
+            dataHist = pickle.load(fileO, encoding = 'bytes')
+        for i in range(len(dataHist)):
+            dictHistoricos['id'].append(str(dataHist[i][1]))
+            dictHistoricos['vehi'].append(str(dataHist[i][10]))
+            dictHistoricos['progre'].append(str(round(dataHist[i][2], 2)))
+            dictHistoricos['fecha'].append(str(dataHist[i][5].strftime("%Y/%m/%d - %H:%M:%S")))
+            dictHistoricos['estado'].append(str(dataHist[i][3]))
     dictIteraCantHistoricos = {'cont': [0]}
     dataframeIteraCantHistoricos = pd.DataFrame(dictIteraCantHistoricos)
     dataframe_historicos = pd.DataFrame(dictHistoricos)
@@ -54,6 +41,7 @@ def visualiza_historicos():
     source_todos_historicos = ColumnDataSource(dataframe_historicos)
     source_historicos = ColumnDataSource(copy.deepcopy(dataframe_historicos[:500]))
     source_historicos_filtrado = ColumnDataSource(copy.deepcopy(dataframe_historicos[:0]))
+#    sourceIteraHistoricos.data['cont'][0] = int(len(dictHistoricos['id'])/500) + 1
     del source_historicos.data['index']
     del source_historicos_filtrado.data['index']
     keys = dictHistoricos.keys()
@@ -65,7 +53,8 @@ def visualiza_historicos():
         TableColumn(field='estado', title='Estado')
     ]
         
-    data_table = DataTable(source=source_todos_historicos, columns=columns, width=600, height=400, editable=True, reorderable=False)
+    data_table = DataTable(source=source_historicos_filtrado, columns=columns, width=600, height=400, editable=True, reorderable=False, css_classes = ["table", "table-striped", "table-bordered", "table-responsive", "table-hover", "cell-border", "compact", "webgrid-table-hidden", 'GridView'])
+#    data_table. = 'GridView'
     data_table.source = source_historicos_filtrado
     
     botonSube = Button(label = "Cargar eventos", button_type="success")
@@ -78,7 +67,7 @@ def visualiza_historicos():
     botonSube.callback = callback_boton_sube
     botonBaja.callback = callback_boton_baja
     
-    archivosCsv = glob.glob('*.csv')
+    archivosCsv = glob.glob('change_emmited*.csv')
     mayor = 0
     #carga los datos de las zonas en un diccionario, lo carga como string, por eso la separacion por comas
     if len(archivosCsv) != 0:
@@ -125,20 +114,15 @@ def visualiza_historicos():
     callback_filtra_fecha = filtra_fecha(source_todos_historicos, source_historicos_filtrado, data_table, source_filtros)
     
     range_slider = RangeSlider(start=pkIni, end=pkFin, value=(pkIni,pkFin), step=.1, title="Filtrar por progresivas", callback=callback_filtra_rango_pk)
-    div = Div(text="""<b>Filtrar por vehiculos:</b>""", width=200, height=10)
+    div = Div(text="""Filtrar por vehiculos:""", width=200, height=10)
     checkbox_eventos = CheckboxGroup(labels=list(np.unique(source_todos_historicos.data['vehi'])), active=[x for x in range(len(list(np.unique(source_historicos.data['vehi']))))], callback = callback_filtra_vehiculos)
-    div2 = Div(text="""<b>Filtrar por estado:</b>""", width=200, height=10)
+    div2 = Div(text="""Filtrar por estado:""", width=200, height=10)
     checkbox_estado = CheckboxGroup(labels=list(np.unique(source_todos_historicos.data['estado'])), active=[x for x in range(len(list(np.unique(source_historicos.data['estado']))))], callback = callback_filtra_estado)
-    div_id = Div(text = '<b>Filtrar por id:</b>', width=200, height=10)
-    filtro_id = TextInput(value='', callback = callback_filtra_id)
-
-    div_fecha_i = Div(text = '<b>Fecha inicial a filtrar:</b>', width=200, height=10)
-    filtro_fecha_ini = TextInput(value='AAAA/MM/DD', width=200, callback=callback_filtra_fecha_ini)
-    div_fecha_f = Div(text = '<b>Fecha final a filtrar:</b>', width=200, height=10)
-    filtro_fecha_fin = TextInput(value='AAAA/MM/DD', width=200, callback=callback_filtra_fecha_fin)
-
-    div_filtro_fecha = Div(text="""<b class = 'adver'>Advertencia:</b> El formato de fechas debe ser <b>AAAA/MM/DD</b> para un filtrado correcto""", width=200, height=60, css_classes = ['div_adver'])
-
+    filtro_id = TextInput(value='', title='Filtrar por id:', callback = callback_filtra_id)
+    
+    filtro_fecha_ini = TextInput(title='Fecha inicial a filtrar', value='AAAA/MM/DD', height=50, width=200, callback=callback_filtra_fecha_ini)
+    filtro_fecha_fin = TextInput(title='Fecha final a filtrar', value='AAAA/MM/DD', height=50, width=200, callback=callback_filtra_fecha_fin)
+    
     boton_filtra_fecha = Button(label = "Filtrar fechas", button_type="success", callback=callback_filtra_fecha)
-
-    return data_table, range_slider, checkbox_eventos, div, checkbox_estado, div2, filtro_id, div_id, botonSube, botonBaja, filtro_fecha_ini, div_fecha_i, filtro_fecha_fin, div_fecha_f, div_filtro_fecha, boton_filtra_fecha
+    
+    return data_table, range_slider, checkbox_eventos, div, checkbox_estado, div2, filtro_id, botonSube, botonBaja, filtro_fecha_ini, filtro_fecha_fin, boton_filtra_fecha
