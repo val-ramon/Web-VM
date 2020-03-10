@@ -23,38 +23,24 @@ def create_map(n):
         contenga las zonas, simplemente lo carga y crea el mapa sobre el mismo.
     """
     #path donde se encuentre el csv con los datos de las zonas
-    pathData = os.environ['USERPROFILE']+'/Downloads/bokeh_flask/bokeh_flask_vm/static/config/'
+    pathData = os.environ['USERPROFILE']+'/Downloads/bokeh_flask/bokeh_flask_vm/'
 
-    archivosCsv = glob.glob(pathData + '*.csv')
+    archivosCsv = glob.glob(pathData + 'change_emmited*.csv')
     dic_cuadrados = defaultdict(list)
     
-    archivosDb = glob.glob(pathData + '*.db')
+    archivosDb = glob.glob(pathData + 'db*.db')
     dictHistoricos = defaultdict(list)
-    pyVersion = platform.python_version()
-    if (int(pyVersion[0]) == 2):
-        fileO = open(archivosDb[-1], 'r')
-    else:
-        fileO = open(archivosDb[-1], 'rb')
-    while True:
+    with open(archivosDb[-1], 'rb') as fileO:
         try:
-            if (int(pyVersion[0]) == 2):
-                dataHist = pickle.load(fileO)
-            else:
-                dataHist = pickle.load(fileO, encoding = 'bytes')
-            dictHistoricos['id'].append(dataHist[1])
-            dictHistoricos['vehi'].append(dataHist[10])
-            dictHistoricos['progre'].append(round(dataHist[2], 2))
-            dictHistoricos['fecha'].append(dataHist[5].strftime("%Y/%m/%d, %H:%M:%S"))
-            dictHistoricos['estado'].append(dataHist[3])
+            dataHist = pickle.load(fileO)
         except:
-            break
-    for i in range(len(dictHistoricos['vehi'])):
-        dictHistoricos['vehi'][i] = str(dictHistoricos['vehi'][i])
-        dictHistoricos['id'][i] = str(dictHistoricos['id'][i])
-        dictHistoricos['progre'][i] = str(dictHistoricos['progre'][i])
-        dictHistoricos['fecha'][i] = str(dictHistoricos['fecha'][i])
-        dictHistoricos['estado'][i] = str(dictHistoricos['estado'][i])
-    fileO.close()
+            dataHist = pickle.load(fileO, encoding = 'bytes')
+        for i in range(len(dataHist)):
+            dictHistoricos['id'].append(str(dataHist[i][1]))
+            dictHistoricos['vehi'].append(str(dataHist[i][10]))
+            dictHistoricos['progre'].append(str(round(dataHist[i][2], 2)))
+            dictHistoricos['fecha'].append(str(dataHist[i][5].strftime("%Y/%m/%d - %H:%M:%S")))
+            dictHistoricos['estado'].append(str(dataHist[i][3]))
     dataframe_historicos = pd.DataFrame(dictHistoricos)
 
     source_historicos = ColumnDataSource(dataframe_historicos)
